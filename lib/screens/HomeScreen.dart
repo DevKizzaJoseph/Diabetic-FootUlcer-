@@ -1,8 +1,10 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:dole/screens/AlertsScreen.dart';
 import 'package:dole/screens/InsolePairingScreen.dart';
 import 'package:dole/screens/SettingsScreen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:dole/model/screenModel.dart' as Model;
 
 class FunctionalityModel {
@@ -59,11 +61,20 @@ class _HomeScreenState extends State<HomeScreen> {
   double pressureValue = 0.0;
   int _currentIndex = 0;
   final List<Widget> _screens = [];
+  
+  List<FlSpot> _temperatureSpots = [];
 
   @override
   void initState() {
     super.initState();
     _connectToDevice();
+    
+    _temperatureSpots = [
+      FlSpot(0, 1),
+      FlSpot(1, 3),
+      FlSpot(2, 10),
+      // Add more FlSpot instances as needed
+    ];
   }
 
   void _connectToDevice() {
@@ -77,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             pressureValue = double.tryParse(readings[2]) ?? 0.0;
             _screens.clear();
             _screens.addAll([
-              HomeContent(
+              NewHomeContent(
                 temperature: temperatureValue,
                 humidity: humidityValue,
                 pressure: pressureValue,
@@ -143,12 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class NewHomeContent extends StatelessWidget {
   final double temperature;
   final double humidity;
   final double pressure;
 
-  const HomeContent({
+  const NewHomeContent({
     Key? key,
     required this.temperature,
     required this.humidity,
@@ -157,28 +168,83 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final temperatureCategory = FunctionalityModel.categorizeTemperature(temperature);
-    final humidityCategory = FunctionalityModel.categorizeHumidity(humidity);
-    final pressureCategory = FunctionalityModel.categorizePressure(pressure);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Temperature: ${temperature.toStringAsFixed(2)} °C', style: const TextStyle(fontSize: 18.0)),
-          const SizedBox(height: 8.0),
-          Text('Humidity: ${humidity.toStringAsFixed(2)} %', style: const TextStyle(fontSize: 18.0)),
-          const SizedBox(height: 8.0),
-          Text('Pressure: ${pressure.toStringAsFixed(2)} Pa', style: const TextStyle(fontSize: 18.0)),
-          const SizedBox(height: 16.0),
-          const Text('Health Status', style: TextStyle(fontSize: 24.0)),
-          const SizedBox(height: 8.0),
-          Text('Pressure: $pressureCategory', style: const TextStyle(fontSize: 18.0)),
-          const SizedBox(height: 8.0),
-          Text('Temperature: $temperatureCategory', style: const TextStyle(fontSize: 18.0)),
-          const SizedBox(height: 8.0),
-          Text('Humidity: $humidityCategory', style: const TextStyle(fontSize: 18.0)),
+          Card(
+            margin: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sensor Readings',
+                    style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Text('Temperature: ${temperature.toStringAsFixed(2)}'),
+                  Text('Humidity: ${humidity.toStringAsFixed(2)}'),
+                  Text('Pressure: ${pressure.toStringAsFixed(2)}'),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Health Status',
+                    style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Text('Temperature: ${FunctionalityModel.categorizeTemperature(temperature)}'),
+                  Text('Humidity: ${FunctionalityModel.categorizeHumidity(humidity)}'),
+                  Text('Pressure: ${FunctionalityModel.categorizePressure(pressure)}'),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Statistics',
+                    style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10.0),
+                  SizedBox(
+                    height: 200.0,
+                    child: LineChart(
+                      LineChartData(
+                        gridData: FlGridData(show: false),
+                        titlesData: FlTitlesData(show: false),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: _temperatureSpots,
+                            isCurved: true,
+                            barWidth: 3,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
