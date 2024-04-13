@@ -39,6 +39,15 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_bluetooth_serial: ^0.4.0
   fl_chart: ^0.67.0
+  shared_preferences: ^2.0.6
+  syncfusion_flutter_core: ^25.1.37
+  syncfusion_flutter_charts: ^25.1.37
+  flutter_local_notifications: ^17.0.0
+  get: ^4.6.6
+  url_launcher: ^6.2.5
+  get_storage: ^2.1.1
+  logger: ^2.2.0
+  http: ^1.2.1
   
 
 dev_dependencies:

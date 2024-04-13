@@ -1,74 +1,159 @@
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isDark = false;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20.0),
-            // Directly use ListView without Flexible
-            ListView(
-              shrinkWrap: true, // Allows ListView to size itself according to its children
-              physics: NeverScrollableScrollPhysics(), // Disables scrolling within ListView
-              children: <Widget>[
-                buildSettingsItem('Notifications', context),
-                buildSettingsItem('Share Data', context, onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => DownloadDataScreen()),
-                  );
-                }),
-                buildSettingsItem('Account Management', context),
+    return MaterialApp(
+      theme: _isDark ? ThemeData.dark() : ThemeData.light(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Settings"),
+        ),
+        body: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: ListView(
+              children: [
+                _SingleSection(
+                  title: "General",
+                  children: [
+                    _CustomListTile(
+                      title: "Dark Mode",
+                      icon: Icons.dark_mode_outlined,
+                      trailing: Switch(
+                        value: _isDark,
+                        onChanged: (value) {
+                          setState(() {
+                            _isDark = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const _CustomListTile(
+                      title: "Notifications",
+                      icon: Icons.notifications_none_rounded,
+                    ),
+                    const _CustomListTile(
+                      title: "Security Status",
+                      icon: Icons.lock,
+                    ),
+                  ],
+                ),
+                const Divider(),
+                _SingleSection(
+                  title: "Organization",
+                  children: const [
+                    _CustomListTile(
+                      title: "Profile",
+                      icon: Icons.person_outline_rounded,
+                    ),
+                    _CustomListTile(
+                      title: "Messaging",
+                      icon: Icons.message_outlined,
+                    ),
+                    _CustomListTile(
+                      title: "Calling",
+                      icon: Icons.phone_outlined,
+                    ),
+                    _CustomListTile(
+                      title: "People",
+                      icon: Icons.contacts_outlined,
+                    ),
+                    _CustomListTile(
+                      title: "Calendar",
+                      icon: Icons.calendar_today_rounded,
+                    ),
+                  ],
+                ),
+                const Divider(),
+                _SingleSection(
+                  children: const [
+                    _CustomListTile(
+                      title: "Help & Feedback",
+                      icon: Icons.help_outline_rounded,
+                    ),
+                    _CustomListTile(
+                      title: "About",
+                      icon: Icons.info_outline_rounded,
+                    ),
+                    _CustomListTile(
+                      title: "Sign out",
+                      icon: Icons.exit_to_app_rounded,
+                    ),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                // Implement logout logic here
-              },
-              child: const Text('Log Out'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildSettingsItem(String title, BuildContext context, {VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 18.0),
+          ),
         ),
       ),
     );
   }
 }
 
-class DownloadDataScreen extends StatelessWidget {
+class _CustomListTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Widget? trailing;
+
+  const _CustomListTile({
+    Key? key,
+    required this.title,
+    required this.icon,
+    this.trailing,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Download Data'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // Implement your data download logic here
-            // For example, generating and sharing a CSV file
-          },
-          child: Text('Download My Data in CSV'),
+    return ListTile(
+      title: Text(title),
+      leading: Icon(icon),
+      trailing: trailing,
+      onTap: () {},
+    );
+  }
+}
+
+class _SingleSection extends StatelessWidget {
+  final String? title;
+  final List<Widget> children;
+
+  const _SingleSection({
+    Key? key,
+    this.title,
+    required this.children,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title != null)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title!,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        Column(
+          children: children,
         ),
-      ),
+      ],
     );
   }
 }
